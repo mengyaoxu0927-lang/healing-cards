@@ -402,8 +402,10 @@
         .card.reveal {
             /* 关键点：翻转时让中心点回到卡片几何中心 */
             transform-origin: center center !important;
-
-            transform: translate(0, 0) scale(1.2) rotateY(180deg) !important;
+            top: 50% !important;
+            left: 50% !important;
+            margin: 0 !important; /* 清除之前 JS 设置的 margin */
+            transform: translate(-50%, -50%) scale(1.3) rotateY(180deg) !important;
             z-index: 200 !important;
             animation: pulse-glow 2s infinite ease-in-out;
             transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -500,11 +502,19 @@
 
         #save-btn { 
             display: none; 
-            margin-top: 30px; 
-            background: rgba(46, 204, 113, 0.1); 
-            border: 1px solid rgba(46, 204, 113, 0.4);
+            position: fixed; /* 改为固定定位 */
+            bottom: 8%;      /* 距离底部留出安全距离 */
+            left: 50%;
+            transform: translateX(-50%); /* 确保水平居中 */
+            padding: 15px 40px;
+            background: rgba(46, 204, 113, 0.2); 
+            border: 1px solid rgba(46, 204, 113, 0.5);
             color: #afffcf;
             z-index: 300;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
         }
 
         #save-btn:hover {
@@ -672,28 +682,40 @@ function startApp() {
                 }
             });
 
-            // 3. 将选中的卡牌移到中央并触发翻转
+            // --- 关键修改处 ---
+            // 清除 spreadCardsSequentially 函数中设置的行内样式 transform
+            // 否则行内样式优先级最高，会盖掉 CSS 里的 .reveal 效果
+            selectedCard.style.transform = ''; 
             selectedCard.style.left = '50%';
-            selectedCard.style.marginLeft = '-35mm'; 
             selectedCard.style.top = '50%';
-            selectedCard.style.marginTop = '-60mm';
+            // 不需要设置 marginLeft/Top 了，交给 CSS 的 translate(-50%, -50%) 处理
 
-            // 【关键修改】：不要在这里写 .style.transform，直接交给 CSS 处理
             setTimeout(() => {
-                selectedCard.classList.add('reveal'); 
-            }, 400);//  稍微调大一点点
+                  selectedCard.classList.add('reveal'); 
+            }, 100);
 
-            // 4. 显示保存按钮
             setTimeout(() => {
-                saveBtn.style.display = 'block';
-            }, 1300);
+                  saveBtn.style.display = 'block';
+            }, 1000);
         }
 
         function saveCard() {
            const cardIndex = cards.indexOf(selectedCard) + 1;
            // 手机端建议直接在新窗口打开图片，方便用户长按保存
            const imgUrl = `images/${cardIndex}.png`;
-           window.open(imgUrl, '_blank');
+           
+           // 提示用户
+           const btn = document.getElementById('save-btn');
+           const originalText = btn.innerText;
+           btn.innerText = "准备下载中...";
+    
+           setTimeout(() => {
+                 const link = document.createElement('a');
+                 link.href = imgUrl;
+                 link.download = `我的疗愈卡-${cardIndex}.png`;
+                 link.click();
+                 btn.innerText = originalText;
+           }, 500);
         }
 
 function toggleMusic() {
