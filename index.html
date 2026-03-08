@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>二十四节气疗愈卡 - 抽卡</title>
+    <style>
+        :root {
+            --bg-color: #1a0a2e; 
+            --card-width: 70mm;
+            --card-height: 120mm;
+            --accent-color: #9d4edd;
+            --glow-color: #c77dff;
+        }
+        #cover-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            /* 使用和背景一样的渐变色，确保完美融合 */
+            background: radial-gradient(circle at center, #240b36 0%, #1a0a2e 100%);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 消失时的平滑过渡效果 */
+            transition: opacity 1.2s ease-in-out, visibility 1.2s, transform 1.2s ease-in-out;
+        }
+
+        .magic-circle-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 增加这行，确保溢出的圆环不会把容器撑开 */
+            flex-shrink: 0;
+        }
+
+        .magic-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #9d4edd 0%, #240b36 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+           align-items: center;
+           cursor: pointer;
+           z-index: 10; /* 确保最高 */
+           border: 2px solid white;
+           box-shadow: 0 0 30px #fff;
+           transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .magic-circle-sub-br {
+            position: absolute;
+            bottom: -30%; /* 稍微溢出屏幕一点点，更有视觉延伸感 */
+            right: -30%;
+            width: 400px; /* 尺寸设为主法阵的一半左右 */
+            height: 400px;
+            mix-blend-mode: screen;
+            animation: rotateCW 40s linear infinite;
+            z-index: 1; 
+            object-fit: contain;
+        }
+
+        .magic-glow-ring {
+            position: absolute;
+            /* 核心：锁定中心点 */
+            top: 50%;
+            left: 50%;
+            /* 初始位移补偿，确保还没开始动画时也是准的 */
+            transform: translate(-50%, -50%) scale(0.95); 
+    
+            width: 110%;
+            height: 110%;
+            border: 2px dashed rgba(199, 125, 255, 0.2);
+            border-radius: 50%;
+            /* 应用修改后的呼吸动画 */
+            animation: breath 4s ease-in-out infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* --- 动画定义 --- */
+        /* 顺时针旋转 */
+       @keyframes rotateCW {
+               from { transform: rotate(0deg); }
+               to { transform: rotate(360deg); }
+        }
+
+        /* 逆时针旋转 */
+       @keyframes rotateCCW {
+               from { transform: rotate(360deg); }
+               to { transform: rotate(0deg); }
+        }
+
+        /* 专门用于居中元素的旋转（保留 translate(-50%, -50%)） */
+        @keyframes rotateCenterCW {
+                from { transform: translate(-50%, -50%) rotate(0deg); }
+                to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* --- 容器与布局 --- */
+        .magic-circle-container {
+               position: relative;
+               width: 600px; /* 适当放大容器 */
+               height: 600px;
+               display: flex;
+               justify-content: center;
+               align-items: center;
+         }
+
+        /* 呼吸动画定义 */
+        @keyframes breath {
+             0%, 100% {  
+                 transform: translate(-50%, -50%) scale(0.95);  
+                 opacity: 0.3;  
+             }
+             50% {  
+                 transform: translate(-50%, -50%) scale(1.05);  
+                 opacity: 0.6;  
+             }
+        } /* <--- 确保这个括号关上了 */
+
+        /* 【新增】逆时针旋转动画说明书 */
+        @keyframes magicRotateCCW {
+            from { transform: translate(-50%, -50%) rotate(360deg); }
+            to { transform: translate(-50%, -50%) rotate(0deg); }
+        }
+
+        /* 【修正位置】外层反向法阵样式 */
+        .main-circle-outer {
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            width: 80%;
+            height: 80%;
+            mix-blend-mode: screen; 
+            filter: drop-shadow(0 0 10px rgba(157, 78, 221, 0.6));
+            
+            /* 这里现在能找到 magicRotateCCW 了 */
+            animation: magicRotateCCW 35s linear infinite;
+            
+            z-index: 1; 
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        /* 隐藏动画：淡出并稍微放大 */
+        .hidden-layer {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: scale(1.2);
+        }
+
+/* 【新增】中间法阵的样式：确保它居中并旋转 */
+.main-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* 关键：必须同时包含位移(居中)和旋转 */
+    transform: translate(-50%, -50%);
+    width: 130%; /* 根据你的素材大小调整，通常比 outer 小一点 */
+    height: 130%;
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 15px rgba(199, 125, 255, 0.5));
+    
+    /* 使用之前定义好的居中旋转动画 */
+    animation: rotateCenterCW 25s linear infinite; 
+    z-index: 2; 
+    object-fit: contain;
+    pointer-events: none;
+}
+
+
+        /* 中央圆形 UI */
+        .center-ui {
+           position: absolute;
+           top: 50%;
+           left: 50%;
+           /* 初始状态：必须包含 translate(-50%, -50%) 才能居中 */
+           transform: translate(-50%, -50%);
+    
+           width: 140px;
+           height: 140px;
+
+           /* 核心：半透明背景 + 模糊滤镜 */
+           background: rgba(157, 78, 221, 0.15); 
+           backdrop-filter: blur(12px);
+           -webkit-backdrop-filter: blur(12px);
+
+           border-radius: 50%;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           cursor: pointer;
+           z-index: 10;
+
+/* 边框和发光：与下方按钮统一 */
+    border: 1px solid rgba(199, 125, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 悬浮态：增加亮度、放大、加强发光 */
+.center-ui:hover { 
+    transform: translate(-50%, -50%) scale(1.1);
+    background: rgba(157, 78, 221, 0.3);
+    border-color: var(--glow-color);
+    box-shadow: 0 0 30px rgba(199, 125, 255, 0.6);
+}
+
+/* 文字样式微调：增加间距和质感 */
+.center-ui span {
+    color: #e0b1ff;
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 4px; /* 增加字间距更有仪式感 */
+    text-align: center;
+    line-height: 1.4;
+    user-select: none;
+    transition: color 0.4s;
+}
+
+.center-ui:hover span {
+    color: white;
+    text-shadow: 0 0 8px white;
+}
+
+/* 提示文字样式 */
+    .instruction-text {
+        position: absolute;
+        top: 12%; /* 距离顶部高度，可以根据感官微调 */
+        width: 100%;
+        text-align: center;
+        font-size: 1.4rem; /* 字号大小 */
+        font-weight: 300;
+        letter-spacing: 3px; /* 字间距，增加高级感 */
+        color: #e0b1ff; /* 浅紫色，呼应你的主题 */
+        text-shadow: 0 0 15px rgba(199, 125, 255, 0.7); /* 发光效果 */
+        z-index: 10;
+        pointer-events: none;
+        animation: fadeInText 2s ease-in-out;
+        transition: opacity 1s ease; /* 确保加了这一行 */
+    }
+
+    @keyframes fadeInText {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: "Microsoft YaHei", sans-serif;
+            color: white;
+        }
+
+        /* 星尘背景容器 */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #240b36 0%, #1a0a2e 100%);
+            z-index: -1; /* 确保在所有元素底层 */
+            overflow: hidden;
+        }
+
+        /* 生成微小的发光粒子 */
+        .stars-container::after {
+            content: "";
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 50px 160px, #9d4edd, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 300px 300px;
+            opacity: 0.6;
+            animation: starsRotate 120s linear infinite;
+        }
+
+        @keyframes starsRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 流星的基础样式 */
+        .shooting-star {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            height: 1px;
+            background: linear-gradient(-45deg, #fff, rgba(0, 0, 255, 0));
+            filter: drop-shadow(0 0 6px #e0b1ff);
+            animation: tail 3s ease-in-out infinite, shooting 3s ease-in-out infinite;
+            z-index: 1;
+            opacity: 1;
+        }
+
+        @keyframes tail {
+            0% { width: 0; }
+            30% { width: 100px; }
+            100% { width: 0; }
+        }
+
+        @keyframes shooting {
+            0% { transform: translateX(0) rotate(35deg); opacity: 1; }
+            100% { transform: translateX(300px) rotate(35deg); opacity: 0; }
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 卡牌通用样式 */
+        .card {
+            position: absolute;
+            width: var(--card-width);
+            height: var(--card-height);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1); 
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            /* 初始状态 */
+            transform: scale(0.8) rotateY(0deg);
+            opacity: 0;
+            
+            /* 【新增核心代码】：设置旋转中心在卡片下方 500px 处，形成大扇形 */
+            transform-origin: center 500px; 
+        }
+
+        /* 卡牌背面 */
+        .card-inner {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background-image: url('images/back.png');
+            background-size: cover;
+            background-position: center;
+            backface-visibility: hidden;
+            border: 1px solid rgba(157, 78, 221, 0.3);
+        }
+
+        /* 卡牌正面 */
+        .card-face-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background-size: cover;
+            background-position: center;
+            transform: rotateY(180deg);
+            backface-visibility: hidden;
+        }
+
+        /* 初始洗牌叠加效果 */
+        .shuffling-start {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        /* 选中时的浮起效果 */
+        .card.selected {
+            transform: translateY(-50px) scale(1.05) rotate(0deg) !important;
+            z-index: 100 !important;
+            box-shadow: 0 0 30px var(--accent-color);
+        }
+
+        /* 最终展示状态：确认选择后居中、放大、翻转、发光 */
+        .card.reveal {
+            /* 关键点：翻转时让中心点回到卡片几何中心 */
+            transform-origin: center center !important;
+
+            transform: translate(0, 0) scale(1.2) rotateY(180deg) !important;
+            z-index: 200 !important;
+            animation: pulse-glow 2s infinite ease-in-out;
+            transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px var(--accent-color); }
+            50% { box-shadow: 0 0 50px var(--glow-color); }
+        }
+
+        /* UI 按钮区域 - 容器调整 */
+        #ui-layer {
+            position: fixed;
+            bottom: 80px; 
+            display: none;
+            gap: 30px;
+            z-index: 300;
+        }
+
+        /* 升级后的精致按钮样式 */
+        button {
+            padding: 14px 40px;
+            background: rgba(157, 78, 221, 0.15); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(199, 125, 255, 0.4); 
+            color: #e0b1ff;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        button:hover {
+            background: rgba(157, 78, 221, 0.3);
+            border-color: var(--glow-color);
+            transform: translateY(-5px) scale(1.05);
+            color: white;
+            box-shadow: 0 0 20px rgba(199, 125, 255, 0.6);
+            text-shadow: 0 0 8px white;
+        }
+
+/* 音乐控制按钮容器 */
+#music-control {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    z-index: 2000; /* 确保在最上层 */
+    width: 44px;
+    height: 44px;
+    background: rgba(157, 78, 221, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(199, 125, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    user-select: none;
+}
+
+#music-control:hover {
+    background: rgba(157, 78, 221, 0.3);
+    border-color: #c77dff;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(199, 125, 255, 0.5);
+}
+
+/* 图标文字样式 */
+#music-icon {
+    font-size: 20px;
+    color: #e0b1ff;
+    text-shadow: 0 0 5px rgba(199, 125, 255, 0.8);
+}
+
+/* 音乐播放时的旋转动画（可选，增加灵动感） */
+.rotating {
+    animation: musicRotate 3s linear infinite;
+}
+
+@keyframes musicRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+        #save-btn { 
+            display: none; 
+            margin-top: 30px; 
+            background: rgba(46, 204, 113, 0.1); 
+            border: 1px solid rgba(46, 204, 113, 0.4);
+            color: #afffcf;
+            z-index: 300;
+        }
+
+        #save-btn:hover {
+            background: rgba(46, 204, 113, 0.25);
+            box-shadow: 0 0 25px rgba(46, 204, 113, 0.5);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="stars-container"></div>
+    <audio id="bgm" src="audio/bgm.mp3" loop></audio>
+    <div id="music-control" onclick="toggleMusic()">
+          <span id="music-icon">🎵</span>
+    </div>
+    <div id="cover-layer">
+        <div class="magic-circle-container">
+           <img src="images/magic_circle_outer.png" class="main-circle-outer" alt="外层法阵">
+
+            <img src="images/magic_circle.png" class="main-circle" alt="内层法阵">
+
+            <img src="images/magic_circle.png" class="magic-circle-sub-br" alt="右下角装饰法阵">
+            
+            <div class="magic-glow-ring"></div>
+            
+            <div class="center-ui" onclick="startApp()">
+                <span>获取指引</span>
+            </div>
+        </div>
+    </div>
+
+     <div class="instruction-text">选择一张卡牌，试试季节的疗愈方法</div>
+    <div id="game-container"></div>
+
+    <div id="ui-layer">
+        <button onclick="cancelSelection()">返回重选</button>
+        <button onclick="confirmSelection()">选择这张</button>
+    </div>
+
+    <button id="save-btn" onclick="saveCard()">保存这张疗愈卡</button>
+
+    <script>
+        const container = document.getElementById('game-container');
+        const uiLayer = document.getElementById('ui-layer');
+        const saveBtn = document.getElementById('save-btn');
+        const cardCount = 24;
+        let cards = [];
+        let selectedCard = null;
+
+        // 初始化生成卡牌，但先隐藏
+        function init() {
+            createShootingStars();
+
+        }
+// 这个函数是给封面中央的按钮点击用的
+function startApp() {
+      // 【新增】点击即播放音乐
+      const music = document.getElementById('bgm');
+      music.play().catch(e => console.log("音频播放被拦截:", e));
+
+    // A. 找到封面层，给它加上我们写好的“消失”样式
+    const cover = document.getElementById('cover-layer');
+    cover.classList.add('hidden-layer');
+
+    // B. 开始生成 24 张卡牌（这就是从 init 挪过来的代码）
+    for (let i = 0; i < cardCount; i++) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div class="card-inner"></div>
+            <div class="card-face-front" style="background-image: url('images/${i+1}.png');"></div>
+        `;
+        container.appendChild(card);
+        cards.push(card);
+    }
+    
+    // C. 这里的 500 表示等待封面消失动画过一半，卡牌再开始飞出来
+    setTimeout(spreadCardsSequentially, 500);
+}
+
+        // 2. 紧接着 init 函数下方，粘贴这段新的“流星逻辑”
+        function createShootingStars() {
+            const starContainer = document.querySelector('.stars-container');
+            setInterval(() => {
+                const star = document.createElement('div');
+                star.className = 'shooting-star';
+                
+                // 随机位置（屏幕上半部分随机出现）
+                star.style.top = Math.random() * 50 + '%';
+                star.style.left = Math.random() * 100 + '%';
+                
+                // 随机延迟（让流星不要同时出来）
+                const delay = Math.random() * 5 + 's';
+                star.style.animationDelay = delay;
+                
+                starContainer.appendChild(star);
+
+                // 4秒后自动把流星删掉，省得电脑变卡
+                setTimeout(() => {
+                    star.remove();
+                }, 4000);
+            }, 2000); // 每2秒生成一颗流星
+        }
+
+        // 核心修改：从左到右依次排开的动画
+        function spreadCardsSequentially() {
+// 【核心参数修改】
+            const spreadAngle = 100; // 展开总角度，增大到 100 度让两边更开
+            const xSpacing = 40;     // 水平间距基数，增大该值可以拉开卡片之间的距离
+
+            cards.forEach((card, i) => {
+                setTimeout(() => {
+                    // 计算每个卡片的索引偏移
+                    const offset = i - (cardCount - 1) / 2;
+                    
+                    // 1. 计算角度：让卡片在 spreadAngle 范围内均匀分布
+                    const angle = offset * (spreadAngle / (cardCount - 1)); 
+                    
+                    // 2. 计算水平偏移：增加 xSpacing 让扇形横向更宽
+                    const xOffset = offset * xSpacing; 
+                    
+                    // 3. 计算微弱弧度：保持中心略高，两边略低的效果
+                    const yOffset = Math.abs(offset) * 4; 
+
+                    card.style.opacity = '1';
+                    // 应用变换：同时结合位移和旋转
+                    card.style.transform = `translateX(${xOffset}px) translateY(${yOffset}px) rotate(${angle}deg)`;
+                    
+                    card.onclick = () => selectCard(card);
+                }, i * 60); 
+            });
+        }
+
+        // 选择卡牌逻辑
+        function selectCard(card) {
+            if (saveBtn.style.display === 'block') return;
+            cards.forEach(c => c.classList.remove('selected'));
+            selectedCard = card;
+            card.classList.add('selected');
+            uiLayer.style.display = 'flex';
+        }
+
+        function cancelSelection() {
+            if (selectedCard) {
+                selectedCard.classList.remove('selected');
+                selectedCard = null;
+                uiLayer.style.display = 'none';
+            }
+        }
+
+        function confirmSelection() {
+            uiLayer.style.display = 'none';
+            
+            // 1. 让提示文字消失
+            const introText = document.querySelector('.instruction-text');
+            if (introText) introText.style.opacity = '0'; // 平滑淡出
+
+            // 2. 隐藏未选中的卡牌（恢复平滑消失效果）
+            cards.forEach(c => {
+                if (c !== selectedCard) {
+                    c.style.opacity = '0';
+                    c.style.pointerEvents = 'none';
+                    c.style.transform = c.style.transform + ' scale(0.5)'; // 增加缩小效果更自然
+                }
+            });
+
+            // 3. 将选中的卡牌移到中央并触发翻转
+            selectedCard.style.left = '50%';
+            selectedCard.style.marginLeft = '-35mm'; 
+            selectedCard.style.top = '50%';
+            selectedCard.style.marginTop = '-60mm';
+
+            // 【关键修改】：不要在这里写 .style.transform，直接交给 CSS 处理
+            setTimeout(() => {
+                selectedCard.classList.add('reveal'); 
+            }, 400);//  稍微调大一点点
+
+            // 4. 显示保存按钮
+            setTimeout(() => {
+                saveBtn.style.display = 'block';
+            }, 1300);
+        }
+
+        function saveCard() {
+            const cardIndex = cards.indexOf(selectedCard) + 1;
+            const link = document.createElement('a');
+            link.href = `images/${cardIndex}.png`;
+            link.download = `我的疗愈卡-${cardIndex}.png`;
+            link.click();
+        }
+
+function toggleMusic() {
+    const music = document.getElementById('bgm');
+    const icon = document.getElementById('music-icon');
+    const container = document.getElementById('music-control');
+
+    if (music.paused) {
+        music.play();
+        icon.innerText = "🎵";
+        container.classList.add('rotating'); // 播放时让图标缓缓旋转
+    } else {
+        music.pause();
+        icon.innerText = "🔇";
+        container.classList.remove('rotating'); // 暂停时停止旋转
+    }
+}
+
+// 顺便微调一下你的 startApp 函数，让它在播放时自动给按钮加上旋转状态
+const originalStartApp = startApp;
+startApp = function() {
+    originalStartApp();
+    document.getElementById('music-control').classList.add('rotating');
+}
+
+
+        init();
+    </script>
+</body>
+</html>
